@@ -48,7 +48,10 @@ if __name__ == "__main__":
     # Allow setting transport via CLI flag --sse or environment variable TRANSPORT=sse
     transport_mode = os.environ.get("TRANSPORT", settings.transport).lower()
     if "--sse" in sys.argv or transport_mode == "sse":
-        logger.info(f"Running server in SSE mode on port {settings.port}...")
+        port = int(os.environ.get("PORT", settings.port))
+        mcp.settings.host = "0.0.0.0"
+        mcp.settings.port = port
+        logger.info(f"Running server in SSE mode on 0.0.0.0:{port}...")
         mcp.run(transport="sse")
     else:
         logger.info("Running server in STDIO mode...")
