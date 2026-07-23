@@ -28,6 +28,22 @@ VALID_ACTIONS = {
 SUPPORTED_PLATFORMS = {"codeforces"}
 
 
+ACTION_ALIASES = {
+    "profile": "get_user_profile",
+    "user_profile": "get_user_profile",
+    "contests": "get_contest_history",
+    "contest_history": "get_contest_history",
+    "submissions": "get_recent_submissions",
+    "recent_submissions": "get_recent_submissions",
+    "rating": "get_rating_history",
+    "rating_history": "get_rating_history",
+    "weak_topics": "analyze_weak_topics",
+    "weak_areas": "analyze_weak_topics",
+    "recommendations": "recommend_problems",
+    "recommend": "recommend_problems",
+}
+
+
 def register_cp_tools(mcp: FastMCP) -> None:
     """
     Register all competitive programming tools on the MCP server.
@@ -39,7 +55,7 @@ def register_cp_tools(mcp: FastMCP) -> None:
     @mcp.tool()
     async def cp_assistant(
         action: str,
-        username: str,
+        username: str = "",
         platform: str = "codeforces",
         count: int = 10,
     ) -> str:
@@ -59,17 +75,35 @@ def register_cp_tools(mcp: FastMCP) -> None:
 
         Args:
             action: The action to perform (see available actions above)
-            username: Codeforces username/handle
+            username: Codeforces username/handle (e.g. 'tourist' or 'shivam1222')
             platform: Platform name, currently only 'codeforces' (default: 'codeforces')
             count: Number of items to return for list operations (default: 10)
 
         Returns:
             JSON-formatted string with the requested data.
         """
+        # Map action aliases if present
+        action_clean = action.strip().lower()
+        if action_clean in ACTION_ALIASES:
+            action = ACTION_ALIASES[action_clean]
+
         logger.info(
             f"cp_assistant called: action={action}, "
             f"username={username}, platform={platform}"
         )
+
+        # Validate username is provided
+        if not username or username.strip() == "":
+            return json.dumps(
+                {
+                    "error": "A 'username' parameter is required (e.g. 'tourist')",
+                    "example": {
+                        "action": action,
+                        "username": "tourist",
+                    },
+                },
+                indent=2,
+            )
 
         # Validate platform
         if platform.lower() not in SUPPORTED_PLATFORMS:

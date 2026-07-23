@@ -49,8 +49,9 @@ def setup_logging(
     # Clear existing handlers to avoid duplicates
     root_logger.handlers.clear()
 
-    # Console handler
-    console_handler = logging.StreamHandler()
+    # Console handler (MUST log to sys.stderr so MCP stdio transport is never corrupted)
+    import sys
+    console_handler = logging.StreamHandler(sys.stderr)
     console_handler.setLevel(getattr(logging, level.upper(), logging.INFO))
     console_handler.setFormatter(formatter)
     root_logger.addHandler(console_handler)
@@ -66,8 +67,23 @@ def setup_logging(
         file_handler.setLevel(getattr(logging, level.upper(), logging.INFO))
         file_handler.setFormatter(formatter)
         root_logger.addHandler(file_handler)
-    except (OSError, PermissionError) as e:
-        root_logger.warning(f"Could not create log file handler: {e}")
+    except (OSError, PermissionError):
+        # Fallback to system temp directory if project directory is read-only
+        try:
+            import tempfile
+
+            temp_log = os.path.join(tempfile.gettempdir(), "devassist.log")
+            file_handler = RotatingFileHandler(
+                temp_log,
+                maxBytes=10 * 1024 * 1024,
+                backupCount=2,
+                encoding="utf-8",
+            )
+            file_handler.setLevel(getattr(logging, level.upper(), logging.INFO))
+            file_handler.setFormatter(formatter)
+            root_logger.addHandler(file_handler)
+        except Exception:
+            pass  # Fail silently to console/stderr
 
     _logging_configured = True
 

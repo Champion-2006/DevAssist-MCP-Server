@@ -42,6 +42,34 @@ VALID_ACTIONS = {
 }
 
 
+ACTION_ALIASES = {
+    "list_repos": "get_user_repos",
+    "get_repos": "get_user_repos",
+    "repos": "get_user_repos",
+    "user_repos": "get_user_repos",
+    "profile": "get_user_profile",
+    "user_profile": "get_user_profile",
+    "activity": "get_user_activity",
+    "events": "get_user_activity",
+    "info": "get_repo_info",
+    "repo_info": "get_repo_info",
+    "commits": "get_latest_commits",
+    "latest_commits": "get_latest_commits",
+    "stats": "get_repo_stats",
+    "repo_stats": "get_repo_stats",
+    "languages": "get_repo_languages",
+    "repo_languages": "get_repo_languages",
+    "contributors": "get_repo_contributors",
+    "repo_contributors": "get_repo_contributors",
+    "releases": "get_latest_release",
+    "release": "get_latest_release",
+    "latest_release": "get_latest_release",
+    "prs": "get_pull_requests",
+    "pull_requests": "get_pull_requests",
+    "issues": "get_issues",
+}
+
+
 def register_github_tools(mcp: FastMCP) -> None:
     """
     Register all GitHub-related tools on the MCP server.
@@ -53,7 +81,7 @@ def register_github_tools(mcp: FastMCP) -> None:
     @mcp.tool()
     async def github_assistant(
         action: str,
-        username: str,
+        username: str = "",
         repository: str | None = None,
         count: int = 5,
         state: str = "open",
@@ -79,7 +107,7 @@ def register_github_tools(mcp: FastMCP) -> None:
 
         Args:
             action: The action to perform (see available actions above)
-            username: GitHub username
+            username: GitHub username (e.g. 'octocat' or 'Champion-2006')
             repository: Repository name (required for repo-specific actions)
             count: Number of items to return for list operations (default: 5)
             state: Filter state for PRs/issues - 'open', 'closed', 'all' (default: 'open')
@@ -88,8 +116,13 @@ def register_github_tools(mcp: FastMCP) -> None:
         Returns:
             JSON-formatted string with the requested data.
         """
+        # Map action aliases if present
+        action_clean = action.strip().lower()
+        if action_clean in ACTION_ALIASES:
+            action = ACTION_ALIASES[action_clean]
+
         # Smart normalization for username & repository inputs (e.g. 'owner/repo' or space formatted names)
-        if "/" in username:
+        if username and "/" in username:
             parts = username.split("/", 1)
             username = parts[0].strip()
             if not repository or repository.strip() == "":
@@ -105,6 +138,19 @@ def register_github_tools(mcp: FastMCP) -> None:
             f"github_assistant called: action={action}, "
             f"username={username}, repository={repository}"
         )
+
+        # Validate username is provided
+        if not username or username.strip() == "":
+            return json.dumps(
+                {
+                    "error": "A 'username' parameter is required (e.g. 'Champion-2006')",
+                    "example": {
+                        "action": action,
+                        "username": "Champion-2006",
+                    },
+                },
+                indent=2,
+            )
 
         # Validate action
         if action not in VALID_ACTIONS:
