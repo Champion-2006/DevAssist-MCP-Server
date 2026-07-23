@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "devassist-mcp": {
+      "command": "python",
+      "args": [
+        "C:/path/to/devassist-mcp/server.py"
+      ],
+      "env": {
+        "GITHUB_TOKEN": "ghp_your_personal_access_token_here"
+      }
+    }
+  }
+}

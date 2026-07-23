@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "devassist-mcp": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "https://devassist-mcp-server.onrender.com/sse"
+      ]
+    }
+  }
+}
