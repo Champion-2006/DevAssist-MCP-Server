@@ -18,9 +18,18 @@
 
 ---
 
-## 📖 Overview
+## 📖 Overview & Project Description
 
-DevAssist MCP is a **Model Context Protocol (MCP) server** that bridges the gap between AI assistants and developer resources. It exposes two powerful tools — **GitHub Assistant** and **Competitive Programming Assistant** — that any MCP-compatible AI agent (Claude Desktop, Cursor, VS Code Copilot) can use to fetch real-time data.
+**DevAssist MCP Server** is a production-grade, asynchronous **Model Context Protocol (MCP) server** engineered to connect AI assistants—such as Claude Desktop, Cursor, and VS Code Copilot—with real-time developer workflows, GitHub repository intelligence, and competitive programming analytics.
+
+### 🎯 Purpose & Core Capabilities
+
+Modern AI coding agents often lack direct access to external developer platforms and competitive programming metrics. DevAssist MCP addresses this by providing two dedicated tools through standard MCP protocol interfaces (STDIO and Server-Sent Events / SSE):
+
+1. 🐙 **`github_assistant`**: Provides comprehensive GitHub integration including user profile lookups, repository metadata, commit histories, code language composition breakdowns, active pull requests, issue tracking, contributor metrics, and release releases notes.
+2. 🏆 **`cp_assistant`**: Integrates with Codeforces to fetch user contest ratings, submission performance history, topic-based accuracy tracking, algorithmic weak-spot identification, and personalized practice problem recommendations based on rating level and weak tags.
+
+Whether deployed locally or accessed via its live **Render.com** cloud endpoint (`https://devassist-mcp-server.onrender.com/sse`), DevAssist MCP enables LLMs to reason over live developer data dynamically.
 
 ### ✨ Key Features
 
