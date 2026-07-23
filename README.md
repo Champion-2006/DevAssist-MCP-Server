@@ -4,8 +4,17 @@
 
 ![Python](https://img.shields.io/badge/Python-3.12%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![MCP](https://img.shields.io/badge/MCP-Protocol-blueviolet?style=for-the-badge)
+![Render](https://img.shields.io/badge/Render-Live%20Deployment-brightgreen?style=for-the-badge&logo=render&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 ![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+
+---
+
+> 🌐 **Live Cloud Deployment**: DevAssist MCP Server is deployed and live on **Render.com**!
+> - **Base URL & Health Check:** `https://devassist-mcp-server.onrender.com/`
+> - **SSE Endpoint:** `https://devassist-mcp-server.onrender.com/sse`
+> 
+> You can connect your Claude Desktop, Cursor, or VS Code client directly to the hosted Render server without running code locally, or run it locally on your own machine.
 
 ---
 
@@ -17,6 +26,7 @@ DevAssist MCP is a **Model Context Protocol (MCP) server** that bridges the gap 
 
 | Feature | Description |
 |---------|-------------|
+| 🌐 **Cloud Deployed** | Live hosting on Render.com with full Server-Sent Events (SSE) support |
 | 🐙 **GitHub Integration** | User profiles, repo info, commits, PRs, issues, statistics |
 | 🏆 **Codeforces Integration** | Profiles, contest history, rating tracking, submissions |
 | 🧠 **Weak Topic Analysis** | AI-powered identification of competitive programming weak areas |
@@ -30,7 +40,7 @@ DevAssist MCP is a **Model Context Protocol (MCP) server** that bridges the gap 
 
 ```mermaid
 graph TD
-    A["🤖 AI Agent<br/>(Claude / Cursor / VS Code)"] -->|MCP Protocol| B["⚙️ DevAssist MCP Server"]
+    A["🤖 AI Agent<br/>(Claude / Cursor / VS Code)"] -->|MCP Protocol / SSE| B["🌐 Live Render MCP Server / Local Server"]
     B --> C["🐙 github_assistant"]
     B --> D["🏆 cp_assistant"]
     C --> E["GitHub Service Layer"]
@@ -46,72 +56,53 @@ graph TD
 
 ---
 
-## 📋 Prerequisites
+## 🔌 Connecting to Claude Desktop (`claude_desktop_config.json`)
 
-- **Python 3.12+**
-- **GitHub Personal Access Token** ([Generate here](https://github.com/settings/tokens)) — for higher API rate limits
-- **pip** or **uv** package manager
+To use this MCP server in **Claude Desktop**, open or create your `claude_desktop_config.json` file.
+
+### 📍 File Locations:
+- **Windows:** `%APPDATA%\Claude\claude_desktop_config.json` *(e.g., `C:\Users\<username>\AppData\Roaming\Claude\claude_desktop_config.json`)*
+- **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Linux:** `~/.config/Claude/claude_desktop_config.json`
 
 ---
 
-## 💻 Installation
+### Option A: Use Live Render Deployment (Recommended)
 
-### Option 1: Using `uv` (Recommended)
+Connect directly to the cloud-hosted server on **Render.com** using `mcp-remote` bridge:
 
-```bash
-# Clone the repository
-git clone https://github.com/your-username/devassist-mcp.git
-cd devassist-mcp
-
-# Create virtual environment and install dependencies
-uv venv
-uv pip install -r requirements.txt
+```json
+{
+  "mcpServers": {
+    "devassist-mcp": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "https://devassist-mcp-server.onrender.com/sse"
+      ]
+    }
+  }
+}
 ```
 
-### Option 2: Using `pip`
+*Or if your version of Claude Desktop supports native SSE configuration:*
 
-```bash
-# Clone the repository
-git clone https://github.com/your-username/devassist-mcp.git
-cd devassist-mcp
-
-# Create virtual environment
-python -m venv venv
-
-# Activate virtual environment
-# Windows:
-venv\Scripts\activate
-# macOS/Linux:
-source venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
+```json
+{
+  "mcpServers": {
+    "devassist-mcp": {
+      "url": "https://devassist-mcp-server.onrender.com/sse"
+    }
+  }
+}
 ```
 
 ---
 
-## ⚙️ Configuration
+### Option B: Use Local Machine Execution
 
-1. Copy the environment template:
-   ```bash
-   cp .env.example .env
-   ```
-
-2. Edit `.env` with your settings:
-   ```env
-   GITHUB_TOKEN=ghp_your_personal_access_token_here
-   LOG_LEVEL=INFO
-   ```
-
-> **Note:** The GitHub token is optional but recommended. Without it, you're limited to 60 API requests/hour. With a token, you get 5,000 requests/hour.
-
----
-
-## 🚀 Usage
-
-### Claude Desktop
-
-Add to your `claude_desktop_config.json`:
+If you prefer to run the MCP server locally on your own machine:
 
 ```json
 {
@@ -127,10 +118,28 @@ Add to your `claude_desktop_config.json`:
 }
 ```
 
+> **Note:** Replace `C:/path/to/devassist-mcp/server.py` with the absolute path to `server.py` on your machine.
+
+---
+
+## 💻 Other IDE Configurations
+
 ### Cursor
 
 Add to your Cursor MCP settings (`.cursor/mcp.json`):
 
+**Using Render Cloud Endpoint:**
+```json
+{
+  "mcpServers": {
+    "devassist-mcp": {
+      "url": "https://devassist-mcp-server.onrender.com/sse"
+    }
+  }
+}
+```
+
+**Using Local Python Script:**
 ```json
 {
   "mcpServers": {
@@ -154,21 +163,92 @@ Add to your VS Code settings:
   "mcp": {
     "servers": {
       "devassist-mcp": {
-        "command": "python",
-        "args": ["C:/path/to/devassist-mcp/server.py"],
-        "env": {
-          "GITHUB_TOKEN": "ghp_your_token_here"
-        }
+        "command": "npx",
+        "args": [
+          "-y",
+          "mcp-remote",
+          "https://devassist-mcp-server.onrender.com/sse"
+        ]
       }
     }
   }
 }
 ```
 
-### Running Standalone
+---
+
+## 📋 Prerequisites & Local Setup
+
+### Prerequisites
+- **Python 3.12+**
+- **GitHub Personal Access Token** ([Generate here](https://github.com/settings/tokens)) — for higher rate limits
+- **pip** or **uv** package manager
+
+### Option 1: Using `uv` (Recommended)
 
 ```bash
+# Clone the repository
+git clone https://github.com/Champion-2006/DevAssist-MCP-Server.git
+cd DevAssist-MCP-Server
+
+# Create virtual environment and install dependencies
+uv venv
+uv pip install -r requirements.txt
+```
+
+### Option 2: Using `pip`
+
+```bash
+# Clone the repository
+git clone https://github.com/Champion-2006/DevAssist-MCP-Server.git
+cd DevAssist-MCP-Server
+
+# Create virtual environment
+python -m venv venv
+
+# Activate virtual environment
+# Windows:
+venv\Scripts\activate
+# macOS/Linux:
+source venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+```
+
+---
+
+## ⚙️ Local Configuration
+
+1. Copy the environment template:
+   ```bash
+   cp .env.example .env
+   ```
+
+2. Edit `.env` with your settings:
+   ```env
+   GITHUB_TOKEN=ghp_your_personal_access_token_here
+   LOG_LEVEL=INFO
+   TRANSPORT=stdio
+   PORT=8000
+   ```
+
+> **Note:** The GitHub token is optional but recommended. Without it, requests are limited to 60 API calls/hour. With a token, limit increases to 5,000 requests/hour.
+
+---
+
+## 🚀 Running Local Standalone
+
+### STDIO Mode (Default)
+```bash
 python server.py
+```
+
+### SSE Transport Mode
+```bash
+python server.py --sse
+# or
+TRANSPORT=sse PORT=8000 python server.py
 ```
 
 ---
@@ -287,7 +367,7 @@ pytest tests/test_codeforces_service.py::test_analyze_weak_topics -v
 
 ```
 devassist-mcp/
-├── server.py                          # MCP server entry point
+├── server.py                          # MCP server entry point (STDIO & SSE)
 ├── config.py                          # Pydantic settings
 ├── .env.example                       # Environment template
 ├── requirements.txt                   # Dependencies
@@ -295,7 +375,7 @@ devassist-mcp/
 ├── Dockerfile                         # Multi-stage Docker build
 ├── .dockerignore                      # Docker build exclusions
 ├── .gitignore                         # Git exclusions
-├── README.md                          # This file
+├── README.md                          # Comprehensive documentation
 ├── tools/
 │   ├── github.py                      # GitHub MCP tool
 │   └── cp.py                          # Codeforces MCP tool
@@ -319,42 +399,20 @@ devassist-mcp/
 
 ---
 
-## 🐳 Deployment
+## 🐳 Deployment Guide
 
-### Docker
+### Render Deployment (Live Production)
 
-```bash
-# Build the image
-docker build -t devassist-mcp .
+This project is deployed live on **Render.com** as a Web Service running in SSE transport mode:
 
-# Run the container
-docker run -e GITHUB_TOKEN=ghp_your_token devassist-mcp
-```
-
-### Railway
-
-1. Connect your GitHub repository
-2. Set environment variable: `GITHUB_TOKEN`
-3. Deploy — Railway auto-detects the Dockerfile
-
-### Render
-
-1. Create a new **Background Worker**
-2. Connect your repository
-3. Set build command: `pip install -r requirements.txt`
-4. Set start command: `python server.py`
-5. Add environment variable: `GITHUB_TOKEN`
-
----
-
-## 🔮 Future Enhancements
-
-- [ ] 🟡 LeetCode integration
-- [ ] 🟠 CodeChef integration
-- [ ] 🔵 Response caching with TTL
-- [ ] 🟢 Request history tracking
-- [ ] 🟣 WebSocket support for live updates
-- [ ] ⚪ Multi-language support
+1. **Service Type:** Web Service
+2. **Build Command:** `pip install -r requirements.txt`
+3. **Start Command:** `python server.py --sse`
+4. **Environment Variables:**
+   - `TRANSPORT`: `sse`
+   - `PORT`: `10000` (or Render default)
+   - `GITHUB_TOKEN`: `ghp_your_github_token`
+5. **Live URL:** `https://devassist-mcp-server.onrender.com`
 
 ---
 
