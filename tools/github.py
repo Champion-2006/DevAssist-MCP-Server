@@ -88,6 +88,19 @@ def register_github_tools(mcp: FastMCP) -> None:
         Returns:
             JSON-formatted string with the requested data.
         """
+        # Smart normalization for username & repository inputs (e.g. 'owner/repo' or space formatted names)
+        if "/" in username:
+            parts = username.split("/", 1)
+            username = parts[0].strip()
+            if not repository or repository.strip() == "":
+                repository = parts[1].strip()
+
+        if repository:
+            repository = repository.strip().rstrip("/")
+            if "github.com/" in repository:
+                repository = repository.split("github.com/")[-1].split("/")[-1]
+            repository = repository.replace(" ", "-")
+
         logger.info(
             f"github_assistant called: action={action}, "
             f"username={username}, repository={repository}"
