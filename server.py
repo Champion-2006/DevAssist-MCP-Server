@@ -74,8 +74,39 @@ logger.info(
     f"with tools: github_assistant, cp_assistant"
 )
 
+# ─── Keep-Alive Ping Task (Prevents Render Free Tier from Sleeping) ─────────
+async def _keep_alive_loop():
+    """Background task that pings the server homepage every 10 minutes to prevent Render sleep."""
+    url = os.environ.get("KEEP_ALIVE_URL", "https://devassist-mcp-server.onrender.com/")
+    await asyncio.sleep(30)
+    while True:
+        try:
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                resp = await client.get(url)
+                logger.debug(f"Keep-alive ping to {url}: status {resp.status_code}")
+        except Exception as e:
+            logger.debug(f"Keep-alive ping failed: {e}")
+        await asyncio.sleep(600)  # Ping every 10 minutes (600s)
+
+
+def start_keep_alive_background_task():
+    """Start keep-alive ping in a background daemon thread."""
+    def _runner():
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        loop.run_until_complete(_keep_alive_loop())
+
+    thread = threading.Thread(target=_runner, daemon=True)
+    thread.start()
+    logger.info("Background keep-alive ping task started (pings every 10 min)")
+
+
 # ─── Entry Point ─────────────────────────────────────────────────────────────
 if __name__ == "__main__":
+    import asyncio
+    import threading
+    import httpx
+
     logger.info("Starting DevAssist MCP Server...")
     logger.info(
         f"GitHub token: {'configured' if settings.github_token else 'not set'}"
@@ -89,6 +120,10 @@ if __name__ == "__main__":
         mcp.settings.port = port
         # Disable localhost-only DNS rebinding protection for cloud deployment (Render, Railway, etc.)
         mcp.settings.transport_security.enable_dns_rebinding_protection = False
+        
+        # Start background keep-alive ping to prevent Render free tier from going to sleep
+        start_keep_alive_background_task()
+
         logger.info(f"Running server in SSE mode on 0.0.0.0:{port}...")
         mcp.run(transport="sse")
     else:
